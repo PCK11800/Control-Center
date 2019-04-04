@@ -4,9 +4,6 @@ import javax.swing.BorderFactory;
 import javax.swing.border.Border;
 import java.awt.Color;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
 
 public class Notes extends Main{
     
@@ -58,10 +55,11 @@ public class Notes extends Main{
         //inputButton ActionListener
         inputButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
-                Notes notes = new Notes();
+                Notes notes = new Notes();     
                 int x_pos = 500;
-                int y_pos = (noteNumber * height);            
+                int y_pos = (noteNumber * height);       
                 noteNumber++;
+                notes.changenoteNumber(noteNumber);
                 input = noteArea.getText();
                 notes.newText(x_pos, y_pos, input);
 
@@ -117,9 +115,11 @@ public class Notes extends Main{
 
     //This calls the FileWriter explictily and stores each new input as a new line.
     void storeTextinFile(String input) throws IOException{
-        PrintWriter out = new PrintWriter(new FileWriter("textstorage.txt", true), true);
-        out.println(input);
-        out.println("Ω"); //to check for end of message
+        BufferedWriter out = new BufferedWriter(new FileWriter("textstorage.txt", true));
+        out.write(input);
+        out.write("\n");
+        out.write("%");
+        out.write("\n");
         out.close();
     }
 
@@ -128,20 +128,29 @@ public class Notes extends Main{
         FileReader textfile = new FileReader("textstorage.txt");
         BufferedReader fileRead = new BufferedReader(textfile);
         try{
-            String in = fileRead.readLine();
-            String prevLine;
-            while (in != null){
-                prevLine = in;
-                in = fileRead.readLine();
-                System.out.println(in);
-                if (in == "Ω"){
-                    System.out.println(prevLine);
-                    in = fileRead.readLine();
+            String line = fileRead.readLine();
+            while (line != null){
+                if(!(line.equals("%"))){
+                    Notes notes = new Notes();
+                    int x_pos = 500;
+                    int y_pos = (noteNumber * height);  
+                    notes.newText(x_pos, y_pos, line);
+                    noteNumber++;
+                    notes.changenoteNumber(noteNumber);
+                    line = fileRead.readLine();
+                }
+                else{ //THIS MANAGES TO SKIP THE % YAYAYAYA
+                    line = fileRead.readLine();
                 }
             }
         }
         finally{
         }
+    }
+
+    int changenoteNumber(int x){
+        noteNumber = x;
+        return noteNumber;
     }
 
 }
